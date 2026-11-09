@@ -1,11 +1,16 @@
 const messageServices = require('../../services/message.services');
 const conversation_repositories = require('../../repositories/conversation.repositories');
 const message_repositories = require('../../repositories/message.repositories');
+const profile_repositories = require('../../repositories/profile.repositories');
 const { get_io } = require('../../socket/socketManager');
+const { upload_file_to_cloudinary } = require('../../utils/cloudinary');
 
 jest.mock('../../repositories/conversation.repositories');
 jest.mock('../../repositories/message.repositories');
+jest.mock('../../repositories/profile.repositories');
 jest.mock('../../socket/socketManager');
+jest.mock('../../utils/checkBlock');
+jest.mock('../../utils/cloudinary');
 
 describe('Message Services', () => {
   afterEach(() => {
@@ -18,15 +23,22 @@ describe('Message Services', () => {
       message_repositories.save_message.mockResolvedValueOnce(mockMessageId);
       conversation_repositories.get_conversation_by_id.mockResolvedValueOnce([{ id: 10 }]);
       conversation_repositories.get_other_users_id.mockResolvedValueOnce([{ user_id: 2 }]);
+      profile_repositories.find_profile_by_user_id.mockResolvedValueOnce({ user_name: 'testuser', avatar: 'avatar.png' });
       const mockEmit = jest.fn();
       const mockTo = jest.fn().mockReturnValue({ emit: mockEmit });
       get_io.mockReturnValue({ to: mockTo });
       conversation_repositories.check_conversation_member.mockResolvedValueOnce(true);
+      upload_file_to_cloudinary.mockResolvedValueOnce({ url: '/uploads/file.url', public_id: 'test', media_type: 'image', file_name: 'file.url', file_size: 1024 });
 
       const result = await messageServices.add_new_message(1, 2, 'direct', 10, 'hello', { filename: 'file.url' });
       
-      expect(message_repositories.save_message).toHaveBeenCalledWith(1, 'hello', 10, '/uploads/file.url');
-      expect(result).toEqual({
+      expect(message_repositories.save_message).toHaveBeenCalledWith(
+        1,
+        'hello',
+        10,
+        expect.objectContaining({ url: '/uploads/file.url' })
+      );
+      expect(result).toMatchObject({
         message_id: mockMessageId,
         sender_id: 1,
         file_url: '/uploads/file.url',
@@ -80,6 +92,7 @@ describe('Message Services', () => {
 
   describe('remove_message', () => {
     it('should delete message and emit event to other user', async () => {
+      message_repositories.get_message_by_id.mockResolvedValueOnce(null);
       message_repositories.delete_message_by_id.mockResolvedValueOnce();
       conversation_repositories.get_other_users_id.mockResolvedValueOnce([{ user_id: 2 }]);
       
@@ -96,6 +109,15 @@ describe('Message Services', () => {
         user_id: 1,
         message_id: 1
       });
+    });
+  });
+
+  describe('get_unread_messages_count', () => {
+    it('should return unread messages count', async () => {
+      message_repositories.get_unread_messages_count.mockResolvedValueOnce(5);
+      const result = await messageServices.get_unread_messages_count(1);
+      expect(message_repositories.get_unread_messages_count).toHaveBeenCalledWith(1);
+      expect(result).toBe(5);
     });
   });
 });

@@ -40,6 +40,7 @@ const seen_message = (socket) => {
   socket.on("message-seen", async (data) => {
     const conversation_id = data.conversation_id;
     const conversation_type = data.conversation_type;
+    if (conversation_id === 0) { return }
     const other_users_id = await get_other_users_id(
       conversation_id,
       user_id,

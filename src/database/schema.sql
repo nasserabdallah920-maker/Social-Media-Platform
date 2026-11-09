@@ -1,7 +1,3 @@
-CREATE DATABASE IF NOT EXISTS social_media;
-
-USE social_media;
-
 CREATE TABLE users (
   id INT NOT NULL AUTO_INCREMENT,
   user_name VARCHAR(255) NOT NULL,
@@ -18,12 +14,12 @@ CREATE TABLE users (
 
 CREATE TABLE profiles (
   id INT NOT NULL AUTO_INCREMENT,
-  avatar VARCHAR(255) DEFAULT NULL,
+  avatar VARCHAR(1000) DEFAULT NULL,
   bio VARCHAR(255) DEFAULT NULL,
   user_id INT NOT NULL,
   is_private TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (id),
-  UNIQUE KEY avatar (avatar),
+
   KEY profiles_ibfk_1 (user_id),
   CONSTRAINT profiles_ibfk_1
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -45,7 +41,11 @@ CREATE TABLE posts (
 CREATE TABLE post_images (
   id INT NOT NULL AUTO_INCREMENT,
   post_id INT NOT NULL,
-  image_url VARCHAR(500) NOT NULL,
+  image_url VARCHAR(1000) NOT NULL,
+  media_type VARCHAR(50) DEFAULT 'image',
+  public_id VARCHAR(255) DEFAULT NULL,
+  file_name VARCHAR(255) DEFAULT NULL,
+  file_size BIGINT UNSIGNED DEFAULT NULL,
   PRIMARY KEY (id),
   KEY post_id (post_id),
   CONSTRAINT post_images_ibfk_1
@@ -141,7 +141,11 @@ CREATE TABLE comment_images (
   id INT NOT NULL AUTO_INCREMENT,
   comment_id INT DEFAULT NULL,
   reply_comment_id INT DEFAULT NULL,
-  image_url VARCHAR(500) NOT NULL,
+  image_url VARCHAR(1000) NOT NULL,
+  media_type VARCHAR(50) DEFAULT 'image',
+  public_id VARCHAR(255) DEFAULT NULL,
+  file_name VARCHAR(255) DEFAULT NULL,
+  file_size BIGINT UNSIGNED DEFAULT NULL,
   PRIMARY KEY (id),
   KEY comment_id (comment_id),
   KEY reply_comment_id (reply_comment_id),
@@ -161,6 +165,8 @@ CREATE TABLE comment_images (
 CREATE TABLE conversations (
   id INT NOT NULL AUTO_INCREMENT,
   type ENUM('direct','group') DEFAULT 'direct',
+  name VARCHAR(255) DEFAULT NULL,
+  avatar VARCHAR(1000) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 );
@@ -168,6 +174,7 @@ CREATE TABLE conversations (
 CREATE TABLE conversation_members (
   conversation_id INT NOT NULL,
   user_id INT NOT NULL,
+  role ENUM('admin','member') DEFAULT 'member',
   PRIMARY KEY (conversation_id, user_id),
   KEY user_id (user_id),
   CONSTRAINT conversation_members_ibfk_1
@@ -185,7 +192,11 @@ CREATE TABLE messages (
   conversation_id INT NOT NULL,
   sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   status ENUM('sent','delivered','seen') DEFAULT 'sent',
-  file_url VARCHAR(300) DEFAULT NULL,
+  file_url VARCHAR(1000) DEFAULT NULL,
+  media_type VARCHAR(50) DEFAULT NULL,
+  public_id VARCHAR(255) DEFAULT NULL,
+  file_name VARCHAR(255) DEFAULT NULL,
+  file_size BIGINT UNSIGNED DEFAULT NULL,
   PRIMARY KEY (id),
   KEY senderId (sender_id),
   KEY conversationId (conversation_id),

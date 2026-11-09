@@ -1,12 +1,17 @@
 const commentReplyServices = require('../../services/commentReply.services');
 const comment_reply_repositories = require('../../repositories/commentReply.repositories');
 const comment_repositories = require('../../repositories/comment.repositories');
+const { upload_file_to_cloudinary } = require('../../utils/cloudinary');
 const AppError = require('../../utils/apperror');
 
 jest.mock('../../repositories/commentReply.repositories');
 jest.mock('../../repositories/comment.repositories');
+jest.mock('../../repositories/post.repositories');
 jest.mock('../../services/user.services');
 jest.mock('../../services/notifications.services');
+jest.mock('../../utils/checkBlock');
+jest.mock('../../utils/checkPrivacy');
+jest.mock('../../utils/cloudinary');
 
 describe('Comment Reply Services', () => {
   afterEach(() => {
@@ -25,13 +30,20 @@ describe('Comment Reply Services', () => {
 
     it('should create and return the reply', async () => {
       comment_repositories.get_comment_by_id.mockResolvedValueOnce({ id: 1 });
+      upload_file_to_cloudinary.mockResolvedValueOnce({ url: '/uploads/img.png', public_id: 'test', media_type: 'image', file_name: 'img.png', file_size: 1024 });
       comment_reply_repositories.create_reply.mockResolvedValueOnce(10);
       const mockReply = { id: 10, text: 'text' };
       comment_reply_repositories.get_reply_by_id.mockResolvedValueOnce(mockReply);
 
       const result = await commentReplyServices.create_reply_service(1, 1, 2, 'text', { filename: 'img.png' });
       
-      expect(comment_reply_repositories.create_reply).toHaveBeenCalledWith(1, 1, 2, 'text', '/uploads/img.png');
+      expect(comment_reply_repositories.create_reply).toHaveBeenCalledWith(
+        1,
+        1,
+        2,
+        'text',
+        expect.objectContaining({ url: '/uploads/img.png' })
+      );
       expect(result).toEqual(mockReply);
     });
   });

@@ -1,5 +1,6 @@
 const commentServices = require('../../services/comment.services');
 const comment_repositories = require('../../repositories/comment.repositories');
+const comment_reply_repositories = require('../../repositories/commentReply.repositories');
 const post_repositories = require('../../repositories/post.repositories');
 const { verify_user_blocking } = require('../../utils/checkBlock');
 const { verify_user_privacy } = require('../../utils/checkPrivacy');
@@ -8,11 +9,13 @@ const { get_user_details_by_id } = require('../../services/user.services');
 const AppError = require('../../utils/apperror');
 
 jest.mock('../../repositories/comment.repositories');
+jest.mock('../../repositories/commentReply.repositories');
 jest.mock('../../repositories/post.repositories');
 jest.mock('../../utils/checkBlock');
 jest.mock('../../utils/checkPrivacy');
 jest.mock('../../services/notifications.services');
 jest.mock('../../services/user.services');
+jest.mock('../../config/redis.config');
 
 describe('Comment Services', () => {
   afterEach(() => {
@@ -45,7 +48,12 @@ describe('Comment Services', () => {
 
       const result = await commentServices.create_comment_service(1, 1, 'text', { filename: 'img.png' });
       
-      expect(comment_repositories.create_comment).toHaveBeenCalledWith(1, 1, 'text', '/uploads/img.png');
+      expect(comment_repositories.create_comment).toHaveBeenCalledWith(
+        1,
+        1,
+        'text',
+        expect.objectContaining({ url: '/uploads/img.png' })
+      );
       expect(sent_comment_notification).toHaveBeenCalledWith(1, 2, 'comment', mockUser, mockPost, mockComment);
       expect(result).toEqual(mockComment);
     });
@@ -63,6 +71,7 @@ describe('Comment Services', () => {
       verify_user_privacy.mockResolvedValueOnce();
       const mockComments = [{ id: 1 }, { id: 2 }];
       comment_repositories.get_comments_by_post_id.mockResolvedValueOnce(mockComments);
+      comment_reply_repositories.get_replies_by_comment_id.mockResolvedValue([]);
 
       const result = await commentServices.get_post_comments_service(1, 1, 10, 0);
       

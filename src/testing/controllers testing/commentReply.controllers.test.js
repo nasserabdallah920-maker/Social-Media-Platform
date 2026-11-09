@@ -91,6 +91,7 @@ describe("Comment Reply Controllers", () => {
 
   describe("get_comment_replies", () => {
     it("should get replies for a comment with pagination", async () => {
+      req.user = { id: 1 };
       req.params = { comment_id: 10 };
       req.query = { page: "2", limit: "5" };
 
@@ -103,11 +104,12 @@ describe("Comment Reply Controllers", () => {
 
       expect(
         commentReply_services.get_comment_replies_service,
-      ).toHaveBeenCalledWith(req.params.comment_id, 5, 5);
+      ).toHaveBeenCalledWith(req.params.comment_id, 5, 5, 1);
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
       expect(res.json).toHaveBeenCalledWith({
         status: status.SUCCESS,
         data: mockReplies,
+        nextPage: null,
       });
     });
   });

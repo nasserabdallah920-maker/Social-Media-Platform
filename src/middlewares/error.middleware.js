@@ -1,25 +1,3 @@
-// const { status, status_code } = require("../utils/status");
-
-// const handle_error = (err, req, res, next) => {
-//   if (err.name === "ZodError") {
-//     return res.status(status_code.UNPROCESSABLE_ENTITY).json({
-//       success: status.FAIL,
-//       error: err.issues.map((e) => ({
-//         field: e.path.join("."),
-//         message: e.message,
-//       })),
-//     });
-//   }
-//   const current_status_code = err.status_code || err.statusCode || status_code.INTERNAL_SERVER_ERROR;
-
-//   return res.status(current_status_code).json({
-//     success: status.FAIL,
-//     message: err.message,
-//   });
-// };
-
-// module.exports = { handle_error };
-
 const { status, status_code } = require("../utils/status");
 
 const handle_error = (err, req, res, next) => {
@@ -33,8 +11,6 @@ const handle_error = (err, req, res, next) => {
       })),
     });
   }
-
-
   switch (err.code) {
     case "ER_DUP_ENTRY":
       return res.status(status_code.CONFLICT).json({

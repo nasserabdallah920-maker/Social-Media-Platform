@@ -104,6 +104,7 @@ describe("Post Controllers", () => {
       expect(res.json).toHaveBeenCalledWith({
         status: status.SUCCESS,
         data: mockPosts,
+        nextPage: null,
       });
     });
 
@@ -121,6 +122,7 @@ describe("Post Controllers", () => {
       expect(res.json).toHaveBeenCalledWith({
         status: status.SUCCESS,
         data: mockPosts,
+        nextPage: null,
       });
     });
   });

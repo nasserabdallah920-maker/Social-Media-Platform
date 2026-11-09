@@ -130,6 +130,7 @@ const sent_reply_notification = async (
     comment.post_id,
     comment.id,
   );
+
   io.to(`user-${user_comment_owner}`).emit("notification", {
     id: notification_id,
     type: type,

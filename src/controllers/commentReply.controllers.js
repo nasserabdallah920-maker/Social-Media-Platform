@@ -17,15 +17,18 @@ const create_reply = async (req, res, next) => {
 
 const get_comment_replies = async (req, res, next) => {
   const { comment_id } = req.params;
+  const requester_id = req.user.id;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
 
-  const replies = await comment_reply_services.get_comment_replies_service(comment_id, limit, offset);
+  const replies = await comment_reply_services.get_comment_replies_service(comment_id, limit, offset, requester_id);
+  const nextPage = replies.length < limit ? null : page + 1;
 
   res.status(status_code.OK).json({
     status: status.SUCCESS,
     data: replies,
+    nextPage,
   });
 };
 

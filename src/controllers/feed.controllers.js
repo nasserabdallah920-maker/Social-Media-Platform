@@ -2,16 +2,19 @@ const { status, status_code } = require("../utils/status");
 const feed_services = require("../services/feed.services");
 
 const feed_posts = async (req, res, next) => {
+
   const { id } = req.user;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
 
   const posts = await feed_services.handle_feed_posts(id, limit, offset);
+  const nextPage = posts.length < limit ? null : page + 1;
 
   res.status(status_code.OK).json({
     success: status.SUCCESS,
     posts: posts,
+    nextPage,
   });
 };
 

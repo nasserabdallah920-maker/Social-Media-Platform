@@ -4,8 +4,8 @@ const auth_services = require("../services/auth.services");
 const cookie_options = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: (Number(process.env.JWT_REFRESH_EXPIRES_DAYS) || 7) * 24 * 60 * 60 * 1000,
 };
 const create_user = async (req, res, next) => {
   const{ first_name, last_name, email, password, user_name }= req.body;
@@ -49,11 +49,13 @@ res.clearCookie("refresh_token", {
 };
 
 const refresh = async (req, res, next) => {
+
   const token = req.cookies.refresh_token;
   const new_token = await auth_services.new_access_token(token);
   res.status(status_code.OK).json({
     success: status.SUCCESS,
-    data: { access_token: new_token.access_token },
+    user: new_token.user,
+    access_token: new_token.access_token,
   });
 }
 const change_user_password = async (req, res, next) => {

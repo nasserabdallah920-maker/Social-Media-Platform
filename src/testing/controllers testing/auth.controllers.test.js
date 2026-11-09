@@ -105,7 +105,7 @@ describe("Auth Controllers", () => {
   describe("refresh", () => {
     it("should generate a new access token using refresh token", async () => {
       req.cookies = { refresh_token: "mock-refresh-token" };
-      const mockNewToken = { access_token: "new-access-token" };
+      const mockNewToken = { access_token: "new-access-token", user: { user_id: 1, user_name: "johndoe" } };
       auth_services.new_access_token.mockResolvedValue(mockNewToken);
 
       await auth_controllers.refresh(req, res, next);
@@ -116,7 +116,8 @@ describe("Auth Controllers", () => {
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
       expect(res.json).toHaveBeenCalledWith({
         success: status.SUCCESS,
-        data: { access_token: mockNewToken.access_token },
+        user: mockNewToken.user,
+        access_token: mockNewToken.access_token,
       });
     });
   });

@@ -12,27 +12,28 @@ module.exports = (server) => {
   const io = new Server(server, {
     cors: {
       credentials: true,
-      origin: process.env.CLIENT_URL,
+      origin: process.env.SOCKET_ORIGIN || process.env.CLIENT_URL,
+      methods:["GET", "POST"]
     },
   });
 
   io.use(socket_auth);
   io.on("connection", async (socket) => {
+
     const user_id = socket.user_id;
     const room = `user-${user_id}`;
     socket.join(room);
     await set_user_status(user_id, io, true);
-    await user_following_handler(user_id, socket, io);
+    user_following_handler(user_id, socket, io);
     seen_message(socket);
     receive_message(socket);
     is_typing(socket);
 
     socket.on("disconnect", () => {
       set_user_status(user_id, io, false);
-      console.log(socket.id, "left");
     });
     socket.on("connect_error", (err) => {
-      console.log(err.message);
+      return next(new Error(err.message));
     });
   });
   return io;

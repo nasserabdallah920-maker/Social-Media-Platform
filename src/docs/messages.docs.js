@@ -53,6 +53,33 @@
 
 /**
  * @swagger
+ * /messages/unread/count:
+ *   get:
+ *     summary: Get unread messages count
+ *     tags: [Messages]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved unread messages count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: integer
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
  * /messages/{conversation_id}:
  *   get:
  *     summary: Get all messages in a conversation

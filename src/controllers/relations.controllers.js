@@ -50,20 +50,34 @@ const reject_request = async (req, res, next) => {
 
 const get_followers = async (req, res, next) => {
   const { user_id } = req.params;
+  const requester_id = req.user.id;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
-  const followers = await relations_service.get_user_followers(user_id, limit, offset);
-  res.status(status_code.OK).json({ success: status.SUCCESS, data: followers });
+  const followers = await relations_service.get_user_followers(user_id, limit, offset, requester_id);
+  const nextPage = followers.length < limit ? null : page + 1;
+  res.status(status_code.OK).json({ success: status.SUCCESS, data: followers, nextPage });
 };
 
 const get_following = async (req, res, next) => {
   const { user_id } = req.params;
+  const requester_id = req.user.id;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
-  const following = await relations_service.get_user_following(user_id, limit, offset);
-  res.status(status_code.OK).json({ success: status.SUCCESS, data: following });
+  const following = await relations_service.get_user_following(user_id, limit, offset, requester_id);
+  const nextPage = following.length < limit ? null : page + 1;
+  res.status(status_code.OK).json({ success: status.SUCCESS, data: following, nextPage });
+};
+
+const get_blocked = async (req, res, next) => {
+  const blocker_id = req.user.id;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+  const blocked_users = await relations_service.get_blocked_users(blocker_id, limit, offset);
+  const nextPage = blocked_users.length < limit ? null : page + 1;
+  res.status(status_code.OK).json({ success: status.SUCCESS, data: blocked_users, nextPage });
 };
 
 const get_relation_status = async (req, res, next) => {
@@ -79,6 +93,12 @@ const get_pending_requests = async (req, res, next) => {
   res.status(status_code.OK).json({ success: status.SUCCESS, data: requests });
 };
 
+const get_pending_requests_count = async (req, res, next) => {
+  const user_id = req.user.id;
+  const count = await relations_service.get_pending_requests_count(user_id);
+  res.status(status_code.OK).json({ success: status.SUCCESS, data: { count } });
+};
+
 module.exports = {
   follow,
   unfollow,
@@ -88,6 +108,8 @@ module.exports = {
   reject_request,
   get_followers,
   get_following,
+  get_blocked,
   get_relation_status,
   get_pending_requests,
+  get_pending_requests_count,
 };

@@ -4,16 +4,16 @@ const { status_code } = require("./status");
 
 const create_tokens = (payload) => {
   const access_token = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
-    expiresIn: "15m",
+    expiresIn: process.env.JWT_ACCESS_EXPIRES || "15m",
   });
   const refresh_token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: "7d",
+    expiresIn: process.env.JWT_REFRESH_EXPIRES || "7d",
   });
   return { access_token, refresh_token };
 };
 const create_reset_token = (payload) => {
   const reset_access_token = jwt.sign(payload, process.env.JWT_RESET_SECRET, {
-    expiresIn: "30m",
+    expiresIn: process.env.JWT_RESET_EXPIRES || "30m",
   });
   return reset_access_token;
 };

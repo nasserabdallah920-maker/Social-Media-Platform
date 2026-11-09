@@ -129,4 +129,29 @@ describe('Relations Services', () => {
       expect(sent_follow_notification).toHaveBeenCalledWith(1, 2, 'follow_accept', mockUser);
     });
   });
+
+  describe('get_blocked_users', () => {
+    it('should return blocked users', async () => {
+      const mockData = [{ id: 2, user_name: 'blocked_user' }];
+      relations_repository.get_blocked_users.mockResolvedValueOnce(mockData);
+
+      const result = await relationsServices.get_blocked_users(1, 10, 0);
+
+      expect(relations_repository.get_blocked_users).toHaveBeenCalledWith(1, 10, 0);
+      expect(result).toEqual(mockData);
+    });
+
+    it('should throw AppError if limit is invalid', async () => {
+      await expect(relationsServices.get_blocked_users(1, 5, 0)).rejects.toThrow(AppError);
+    });
+  });
+
+  describe('get_pending_requests_count', () => {
+    it('should return pending requests count', async () => {
+      relations_repository.get_pending_requests_count.mockResolvedValueOnce(3);
+      const result = await relationsServices.get_pending_requests_count(2);
+      expect(relations_repository.get_pending_requests_count).toHaveBeenCalledWith(2);
+      expect(result).toBe(3);
+    });
+  });
 });

@@ -16,9 +16,12 @@ const get_all_notifications = async (req, res, next) => {
     Number(limit),
   );
 
+  const nextPage = notifications.length < Number(limit) ? null : Number(page) + 1;
+
   res.status(200).json({
     success: true,
     data: notifications,
+    nextPage,
   });
 };
 
@@ -31,9 +34,12 @@ const get_all_unreaded_notifications = async (req, res, next) => {
     Number(limit),
   );
 
+  const nextPage = notifications.length < Number(limit) ? null : Number(page) + 1;
+
   res.status(200).json({
     success: true,
     data: notifications,
+    nextPage,
   });
 };
 

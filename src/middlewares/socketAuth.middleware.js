@@ -1,20 +1,29 @@
-const app_error = require("../utils/apperror");
+
 const { verify_access_token } = require("../utils/jwt");
 
 const socket_auth = (socket, next) => {
-  const auth_header = socket.handshake.auth.token||socket.handshake.headers.auth;
-  const token = auth_header ? auth_header.split(" ")[1] : null;
+  const auth_header =
+    socket.handshake.auth.token ||
+    socket.handshake.headers.auth;
+
+  const token = auth_header
+    ? auth_header.startsWith("Bearer ")
+      ? auth_header.slice(7)
+      : auth_header
+    : null;
 
   if (!token) {
-    return next(new Error("token not found"));
-  }
-  const payload = verify_access_token(token);
-  if (!payload) {
-    return next(new Error("User not found"));
+    return next(new Error("Token not found"));
   }
 
-  socket.user_id = payload.id;
-  next();
+  try {
+    const payload = verify_access_token(token);
+
+    socket.user_id = payload.id;
+    return next();
+  } catch (err) {
+    return next(new Error("Invalid or expired token"));
+  }
 };
 
 module.exports = { socket_auth };

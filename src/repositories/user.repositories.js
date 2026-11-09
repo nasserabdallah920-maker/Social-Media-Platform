@@ -50,18 +50,25 @@ const delete_user_by_id = async (user_id) => {
   return result;
 };
 
-const find_user_details_by_id = async (user_id) => {
+const find_user_details_by_id = async (user_id, from_user_id = null) => {
   const sql = `
     SELECT 
       u.id, u.user_name, u.first_name, u.last_name, 
       p.avatar, p.bio, p.is_private,
       (SELECT COUNT(*) FROM follows WHERE following_id = u.id) AS followers_count,
-      (SELECT COUNT(*) FROM follows WHERE follower_id = u.id) AS following_count
+      (SELECT COUNT(*) FROM follows WHERE follower_id = u.id) AS following_count,
+      (SELECT COUNT(*) FROM posts WHERE user_id = u.id) AS posts_count,
+      CASE WHEN ? IS NOT NULL THEN
+        EXISTS (SELECT 1 FROM follows WHERE follower_id = ? AND following_id = u.id)
+      ELSE NULL END AS is_following,
+      CASE WHEN ? IS NOT NULL THEN
+        EXISTS (SELECT 1 FROM requests WHERE from_user_id = ? AND to_user_id = u.id)
+      ELSE NULL END AS is_requested
     FROM users u
     LEFT JOIN profiles p ON u.id = p.user_id
     WHERE u.id = ?
   `;
-  const [rows] = await db.query(sql, [user_id]);
+  const [rows] = await db.query(sql, [from_user_id, from_user_id, from_user_id, from_user_id, user_id]);
   return rows[0];
 };
 

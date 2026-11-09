@@ -5,6 +5,7 @@ const { status_code } = require("../utils/status");
 const Redis = require("../config/redis.config");
 const { verify_user_blocking } = require("../utils/checkBlock");
 const { verify_user_privacy } = require("../utils/checkPrivacy");
+
 const get_user_by_id = async (user_id) => {
   const caching_user = await Redis.get(`user:${user_id}`);
   if (caching_user) {
@@ -19,7 +20,7 @@ const get_user_by_id = async (user_id) => {
 };
 
 const get_user_details_by_id = async (user_id, from_user_id) => {
-  const user = await user_repository.find_user_details_by_id(user_id);
+  const user = await user_repository.find_user_details_by_id(user_id, from_user_id);
   if (!user) {
     throw new AppError("This user does not exist", status_code.NOT_FOUND);
   }

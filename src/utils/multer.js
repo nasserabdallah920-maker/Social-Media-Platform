@@ -9,52 +9,66 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, "..", "uploads"));
   },
   filename: (req, file, cb) => {
-    const arr = file.originalname.split(".");
-    const ext = arr[arr.length - 1];
+    const ext = path.extname(file.originalname).toLowerCase().replace(".", "") || "bin";
     const random = crypto.randomBytes(16).toString("hex");
-
     cb(null, `${random}.${ext}`);
   },
 });
 
 const fileFilter = (req, file, cb) => {
   const field_name = file.fieldname;
-  const arr = file.originalname.split(".");
-  const ext = arr[arr.length - 1];
-  const img_array = ["jpg", "jpeg", "png", "webp"];
-  const fields_allowed_always = ["post_files", "file"];
-  const files_array = [
-    ...img_array,
-    "mp4",
-    "webm",
-    "mov",
-    "pdf",
-    "doc",
-    "docx",
-    "xls",
-    "xlsx",
-    "ppt",
-    "pptx",
-    "txt",
-    "zip",
-    "rar",
+
+  const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
+  const mime_subtype = file.mimetype ? file.mimetype.split("/")[1]?.toLowerCase() : "";
+
+  const img_array = ["jpg", "jpeg", "png", "webp", "gif", "svg"];
+  const video_array = ["mp4", "webm", "mov", "mkv", "avi", "wmv", "flv", "3gp"];
+  const audio_array = ["mp3", "wav", "m4a", "ogg", "aac", "flac"];
+  const doc_array = [
+    "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv",
+    "zip", "rar", "7z", "tar", "gz"
   ];
-  if (
-    (field_name === "avatar" && img_array.includes(ext)) ||
-    (fields_allowed_always.includes(field_name) && files_array.includes(ext))
-  ) {
-    cb(null, true);
-  } else {
-    cb(
+
+  const allowed_all = [...img_array, ...video_array, ...audio_array, ...doc_array];
+
+  if (field_name === "avatar") {
+    if (img_array.includes(ext) || img_array.includes(mime_subtype)) {
+      return cb(null, true);
+    }
+    return cb(
       new AppError(
-        "Only image files are allowed with extentions jpg jpeg png webp",
-        status_code.BAD_REQUEST,
+        "Only image files are allowed for avatar (jpg, jpeg, png, webp, gif)",
+        status_code.BAD_REQUEST
       ),
-      false,
+      false
     );
   }
+
+  if (
+    allowed_all.includes(ext) ||
+    allowed_all.includes(mime_subtype) ||
+    file.mimetype.startsWith("image/") ||
+    file.mimetype.startsWith("video/") ||
+    file.mimetype.startsWith("audio/")
+  ) {
+    return cb(null, true);
+  }
+
+  cb(
+    new AppError(
+      `File type not allowed. Supported formats: images, videos, audio, documents, and archives.`,
+      status_code.BAD_REQUEST
+    ),
+    false
+  );
 };
 
-const uploads = multer({ storage, fileFilter });
+const uploads = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: (Number(process.env.MAX_FILE_SIZE_MB) || 100) * 1024 * 1024,
+  },
+});
 
 module.exports = uploads;

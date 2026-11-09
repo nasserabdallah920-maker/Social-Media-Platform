@@ -43,6 +43,7 @@ describe("feed_posts", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: status.SUCCESS,
       posts: mockPosts,
+      nextPage: null,
     });
   });
 

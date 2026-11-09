@@ -32,7 +32,7 @@ describe("Notifications Controllers", () => {
 
       expect(notifications_services.get_notifications).toHaveBeenCalledWith(1, 1, 10);
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ success: true, data: mockData });
+      expect(res.json).toHaveBeenCalledWith({ success: true, data: mockData, nextPage: null });
     });
   });
 

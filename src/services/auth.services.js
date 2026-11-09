@@ -97,11 +97,14 @@ const new_access_token = async (refresh_token) => {
   if (!user_refresh_token || user_refresh_token !== refresh_token) {
     throw new AppError("Mismatched token", status_code.UNAUTHORIZED);
   }
-  const payload = { id: verify.id, role: verify.role };
+
+  const user = await repo.find_user_by_id(verify.id);
+
+  const payload = create_payload(user);
   const tokens = await create_tokens(payload);
   return {
     access_token: tokens.access_token,
-    user: { user_id: verify.id, role: verify.role },
+    user: { user_id: user.id, user_name: user.user_name },
   };
 };
 

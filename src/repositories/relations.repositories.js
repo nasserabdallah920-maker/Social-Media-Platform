@@ -123,12 +123,33 @@ const get_following_without_limit = async (user_id) => {
   return rows;
 };
 
+const get_blocked_users = async (blocker_id, limit = 10, offset = 0) => {
+  const [rows] = await db.query(
+    `SELECT u.id, u.user_name, u.first_name, u.last_name, p.avatar
+     FROM blocks b
+     JOIN users u ON b.blocked_id = u.id
+     LEFT JOIN profiles p ON u.id = p.user_id
+     WHERE b.blocker_id = ?
+     LIMIT ? OFFSET ?`,
+    [blocker_id, limit, offset],
+  );
+  return rows;
+};
+
 const get_pending_requests = async (to_user_id) => {
   const [rows] = await db.query(
     "SELECT u.id, u.user_name, u.first_name, u.last_name, p.avatar FROM requests r JOIN users u ON r.from_user_id = u.id LEFT JOIN profiles p ON u.id = p.user_id WHERE r.to_user_id = ?",
     [to_user_id],
   );
   return rows;
+};
+
+const get_pending_requests_count = async (to_user_id) => {
+  const [rows] = await db.query(
+    "SELECT COUNT(*) as count FROM requests WHERE to_user_id = ?",
+    [to_user_id],
+  );
+  return rows[0].count;
 };
 
 module.exports = {
@@ -145,7 +166,9 @@ module.exports = {
   delete_request_mutual,
   get_followers,
   get_following,
+  get_blocked_users,
   get_pending_requests,
+  get_pending_requests_count,
   get_followers_without_limit,
   get_following_without_limit
 };

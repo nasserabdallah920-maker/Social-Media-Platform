@@ -83,6 +83,7 @@ describe("Relations Controllers", () => {
 
   describe("get_followers", () => {
     it("should get followers", async () => {
+      req.user = { id: 1 };
       req.params = { user_id: 2 };
       req.query = { page: "1", limit: "10" };
 
@@ -91,9 +92,25 @@ describe("Relations Controllers", () => {
 
       await relations_controllers.get_followers(req, res, next);
 
-      expect(relations_services.get_user_followers).toHaveBeenCalledWith(2, 10, 0);
+      expect(relations_services.get_user_followers).toHaveBeenCalledWith(2, 10, 0, 1);
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
-      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockData });
+      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockData, nextPage: null });
+    });
+  });
+
+  describe("get_blocked", () => {
+    it("should get blocked users", async () => {
+      req.user = { id: 1 };
+      req.query = { page: "1", limit: "10" };
+
+      const mockData = [{ id: 2, user_name: "blocked_user" }];
+      relations_services.get_blocked_users.mockResolvedValue(mockData);
+
+      await relations_controllers.get_blocked(req, res, next);
+
+      expect(relations_services.get_blocked_users).toHaveBeenCalledWith(1, 10, 0);
+      expect(res.status).toHaveBeenCalledWith(status_code.OK);
+      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockData, nextPage: null });
     });
   });
 
@@ -110,6 +127,20 @@ describe("Relations Controllers", () => {
       expect(relations_services.get_relation_status).toHaveBeenCalledWith(1, 2);
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
       expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockStatus });
+    });
+  });
+
+  describe("get_pending_requests_count", () => {
+    it("should return pending requests count", async () => {
+      req.user = { id: 1 };
+
+      relations_services.get_pending_requests_count.mockResolvedValue(4);
+
+      await relations_controllers.get_pending_requests_count(req, res, next);
+
+      expect(relations_services.get_pending_requests_count).toHaveBeenCalledWith(1);
+      expect(res.status).toHaveBeenCalledWith(status_code.OK);
+      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: { count: 4 } });
     });
   });
 });

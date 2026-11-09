@@ -189,6 +189,34 @@
 
 /**
  * @swagger
+ * /relations/blocked:
+ *   get:
+ *     summary: Get users blocked by the current user
+ *     tags: [Relations]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of users per page (10-100)
+ *     responses:
+ *       200:
+ *         description: List of blocked users
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
  * /relations/status/{user_id}:
  *   get:
  *     summary: Get relation status with another user
@@ -220,6 +248,33 @@
  *     responses:
  *       200:
  *         description: List of pending requests
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /relations/requests/pending/count:
+ *   get:
+ *     summary: Get pending follow requests count
+ *     tags: [Relations]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved pending requests count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: integer
  *       401:
  *         description: Unauthorized
  */

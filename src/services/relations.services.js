@@ -13,6 +13,7 @@ const {
 const { sent_follow_notification } = require("./notifications.services");
 const { get_user_details_by_id } = require("./user.services");
 const { verify_user_blocking } = require("../utils/checkBlock");
+const { verify_user_privacy } = require("../utils/checkPrivacy");
 
 const follow_user = async (follower_id, following_id) => {
   if (String(follower_id) === String(following_id)) {
@@ -155,22 +156,30 @@ const reject_request = async (to_user_id, from_user_id) => {
   await relations_repository.delete_request(from_user_id, to_user_id);
 };
 
-const get_user_followers = async (user_id, limit, offset) => {
+const get_user_followers = async (user_id, limit, offset, requester_id = null) => {
   if (limit < 10 || limit > 100) {
     throw new AppError(
       "The limit must be at least 10 or at most 100.",
       status_code.BAD_REQUEST,
     );
   }
+  if (requester_id) {
+    await verify_user_blocking(user_id, requester_id);
+    await verify_user_privacy(user_id, requester_id);
+  }
   return await relations_repository.get_followers(user_id, limit, offset);
 };
 
-const get_user_following = async (user_id, limit, offset) => {
+const get_user_following = async (user_id, limit, offset, requester_id = null) => {
   if (limit < 10 || limit > 100) {
     throw new AppError(
       "The limit must be at least 10 or at most 100.",
       status_code.BAD_REQUEST,
     );
+  }
+  if (requester_id) {
+    await verify_user_blocking(user_id, requester_id);
+    await verify_user_privacy(user_id, requester_id);
   }
   return await relations_repository.get_following(user_id, limit, offset);
 };
@@ -196,8 +205,22 @@ const get_relation_status = async (current_user_id, target_user_id) => {
   };
 };
 
+const get_blocked_users = async (blocker_id, limit, offset) => {
+  if (limit < 10 || limit > 100) {
+    throw new AppError(
+      "The limit must be at least 10 or at most 100.",
+      status_code.BAD_REQUEST,
+    );
+  }
+  return await relations_repository.get_blocked_users(blocker_id, limit, offset);
+};
+
 const get_pending_requests = async (user_id) => {
   return await relations_repository.get_pending_requests(user_id);
+};
+
+const get_pending_requests_count = async (user_id) => {
+  return await relations_repository.get_pending_requests_count(user_id);
 };
 
 module.exports = {
@@ -209,6 +232,8 @@ module.exports = {
   reject_request,
   get_user_followers,
   get_user_following,
+  get_blocked_users,
   get_relation_status,
   get_pending_requests,
+  get_pending_requests_count,
 };

@@ -2,9 +2,11 @@ const post_services = require("../services/post.services");
 const { status_code, status } = require("../utils/status");
 
 const create_post = async (req, res, next) => {
+
   const user_id = req.user.id;
   const { text } = req.body;
   const files = req.files;
+  
 
   const post = await post_services.create_post_service(user_id, text, files);
 
@@ -32,10 +34,12 @@ const get_user_posts = async (req, res, next) => {
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
   const posts = await post_services.get_user_posts_service(user_id, requester_id, limit, offset);
+  const nextPage = posts.length < limit ? null : page + 1;
 
   res.status(status_code.OK).json({
     status: status.SUCCESS,
     data: posts,
+    nextPage,
   });
 };
 
@@ -80,9 +84,8 @@ const delete_post = async (req, res, next) => {
 const delete_post_file = async (req, res, next) => {
   const user_id = req.user.id;
   const { id } = req.params;
-  const { file_url } = req.body;
+  const file_url = req.query?.file_url || req.body?.file_url;
   await post_services.delete_post_file_service(user_id, id, file_url);
-
   res.status(status_code.OK).json({
     status: status.SUCCESS,
     message: "Post image deleted successfully",

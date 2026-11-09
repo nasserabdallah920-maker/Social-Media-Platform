@@ -7,6 +7,8 @@ const { get_user_details_by_id } = require("./user.services");
 const { verify_user_blocking } = require("../utils/checkBlock");
 const { verify_user_privacy } = require("../utils/checkPrivacy");
 
+const Redis = require("../config/redis.config");
+
 const toggle_like_service = async (user_id, post_id) => {
   const post = await post_repositories.get_post_by_id(post_id);
   if (!post) {
@@ -23,9 +25,12 @@ const toggle_like_service = async (user_id, post_id) => {
   const user = await get_user_details_by_id(user_id);
   if (existing_like) {
     await like_repositories.remove_like(user_id, post_id);
+    await Redis.del(`post:${post_id}`);
     return { liked: false };
   } else {
     await like_repositories.add_like(user_id, post_id);
+    await Redis.del(`post:${post_id}`);
+
     if (String(user_id) !== String(post.user_id)) {
       await sent_like_notification(
         user_id,

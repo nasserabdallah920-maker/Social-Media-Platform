@@ -40,7 +40,7 @@ describe("Message Controllers", () => {
 
       expect(message_services.get_conversation_messages).toHaveBeenCalledWith(1, 10, 10, 0);
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
-      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockMessages });
+      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockMessages, nextPage: null });
     });
   });
 
@@ -65,7 +65,7 @@ describe("Message Controllers", () => {
         req.file
       );
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
-      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS });
+      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockResult });
     });
 
     it("should throw AppError if no file is provided", async () => {
@@ -114,6 +114,20 @@ describe("Message Controllers", () => {
       );
       expect(res.status).toHaveBeenCalledWith(status_code.NO_CONTENT);
       expect(res.send).toHaveBeenCalled();
+    });
+  });
+
+  describe("get_unread_messages_count", () => {
+    it("should return unread messages count", async () => {
+      req.user = { id: 1 };
+
+      message_services.get_unread_messages_count.mockResolvedValue(5);
+
+      await message_controllers.get_unread_messages_count(req, res, next);
+
+      expect(message_services.get_unread_messages_count).toHaveBeenCalledWith(1);
+      expect(res.status).toHaveBeenCalledWith(status_code.OK);
+      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: { count: 5 } });
     });
   });
 });

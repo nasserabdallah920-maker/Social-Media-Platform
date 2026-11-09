@@ -233,6 +233,7 @@ All routes are prefixed with `/api`. Every route except register, login, refresh
 | POST   | `/request/reject/:from_user_id` | Reject a follow request            |
 | GET    | `/followers/:user_id`           | List a user's followers            |
 | GET    | `/following/:user_id`           | List who a user follows            |
+| GET    | `/blocked`                      | List users blocked by the current user |
 | GET    | `/status/:user_id`              | Relation status with a user        |
 | GET    | `/requests/pending`             | List pending follow requests       |
 

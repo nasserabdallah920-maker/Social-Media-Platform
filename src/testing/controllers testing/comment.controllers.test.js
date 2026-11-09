@@ -98,11 +98,14 @@ describe("Comment Controllers", () => {
         req.user.id,
         10,
         0,
+        3,
+        1,
       );
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
       expect(res.json).toHaveBeenCalledWith({
         status: status.SUCCESS,
         data: mockComments,
+        nextPage: null,
       });
     });
   });

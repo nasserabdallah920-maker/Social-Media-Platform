@@ -11,6 +11,9 @@ describe("Conversation Controllers", () => {
     req = {
       user: {},
       params: {},
+      query: {},
+      body: {},
+      file: null,
     };
     res = {
       status: jest.fn().mockReturnThis(),
@@ -29,20 +32,21 @@ describe("Conversation Controllers", () => {
 
       await conversation_controllers.get_user_conversations(req, res, next);
 
-      expect(conversation_services.get_user_conversations).toHaveBeenCalledWith(req.user.id);
+      expect(conversation_services.get_user_conversations).toHaveBeenCalledWith(1, 10, 0);
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
-      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockResult });
+      expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: mockResult, nextPage: null });
     });
   });
 
   describe("delete_conversation", () => {
     it("should delete a conversation", async () => {
+      req.user = { id: 1 };
       req.params = { conversation_id: 10 };
       conversation_services.remove_conversation.mockResolvedValue(true);
 
       await conversation_controllers.delete_conversation(req, res, next);
 
-      expect(conversation_services.remove_conversation).toHaveBeenCalledWith(req.params.conversation_id);
+      expect(conversation_services.remove_conversation).toHaveBeenCalledWith(1, req.params.conversation_id);
       expect(res.status).toHaveBeenCalledWith(status_code.NO_CONTENT);
       expect(res.send).toHaveBeenCalled();
     });
@@ -59,6 +63,27 @@ describe("Conversation Controllers", () => {
       expect(conversation_services.add_conversation).toHaveBeenCalledWith([req.user.id, req.params.user_id]);
       expect(res.status).toHaveBeenCalledWith(status_code.OK);
       expect(res.json).toHaveBeenCalledWith({ success: status.SUCCESS, data: { conversation_id: 10 } });
+    });
+  });
+
+  describe("create_group_conversation", () => {
+    it("should create a group conversation with name", async () => {
+      req.user = { id: 1 };
+      req.body = { users: [2, 3], name: "Dev Team" };
+      conversation_services.add_conversation.mockResolvedValue(100);
+
+      await conversation_controllers.create_group_conversation(req, res, next);
+
+      expect(conversation_services.add_conversation).toHaveBeenCalledWith(
+        [2, 3, 1],
+        "group",
+        { name: "Dev Team", avatar: null, creator_id: 1 }
+      );
+      expect(res.status).toHaveBeenCalledWith(status_code.OK);
+      expect(res.json).toHaveBeenCalledWith({
+        success: status.SUCCESS,
+        data: { conversation_id: 100, name: "Dev Team", avatar: null },
+      });
     });
   });
 });

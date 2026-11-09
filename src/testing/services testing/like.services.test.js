@@ -13,6 +13,7 @@ jest.mock('../../services/notifications.services');
 jest.mock('../../services/user.services');
 jest.mock('../../utils/checkBlock');
 jest.mock('../../utils/checkPrivacy');
+jest.mock('../../config/redis.config');
 
 describe('Like Services', () => {
   afterEach(() => {

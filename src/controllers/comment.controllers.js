@@ -21,12 +21,16 @@ const get_post_comments = async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
+  const replies_page = parseInt(req.query.replies_page) || 1;
+  const replies_limit = parseInt(req.query.replies_limit) || 3;
 
-  const comments = await comment_services.get_post_comments_service(post_id, requester_id, limit, offset);
+  const comments = await comment_services.get_post_comments_service(post_id, requester_id, limit, offset, replies_limit, replies_page);
+  const nextPage = comments.length < limit ? null : page + 1;
 
   res.status(status_code.OK).json({
     status: status.SUCCESS,
     data: comments,
+    nextPage,
   });
 };
 

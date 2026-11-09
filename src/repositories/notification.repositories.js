@@ -26,7 +26,7 @@ SELECT n.*,p.avatar, u.user_name , c.text FROM notifications n
 left join profiles p
 on n.actor_id = p.user_id
 left join users u
-on n.user_id = u.id
+on n.actor_id = u.id
 left join comments c
 on n.comment_id = c.id
 WHERE n.user_id = ?
@@ -45,7 +45,7 @@ SELECT n.*,p.avatar, u.user_name , c.text FROM notifications n
 left join profiles p
 on n.actor_id = p.user_id
 left join users u
-on n.user_id = u.id
+on n.actor_id = u.id
 left join comments c
 on n.comment_id = c.id
 WHERE n.user_id = ? and n.is_read=false

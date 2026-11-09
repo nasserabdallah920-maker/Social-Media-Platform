@@ -156,11 +156,10 @@
  *                 success:
  *                   type: string
  *                   example: success
- *                 data:
+ *                 user:
  *                   type: object
- *                   properties:
- *                     access_token:
- *                       type: string
+ *                 access_token:
+ *                   type: string
  *       401:
  *         description: Invalid or missing refresh token
  */

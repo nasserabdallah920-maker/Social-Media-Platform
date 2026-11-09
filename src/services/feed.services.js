@@ -9,6 +9,7 @@ const handle_feed_posts = async (user_id, limit, offset) => {
     throw new AppError('The limit must be at least 10 or at most 100.',status_code.BAD_REQUEST)
   }
   const posts = await feed_repositories.get_posts_feed(user_id, limit, offset);
+
   return posts;
 };
 

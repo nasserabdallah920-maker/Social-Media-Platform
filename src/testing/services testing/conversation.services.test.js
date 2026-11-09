@@ -18,9 +18,9 @@ describe('Conversation Services', () => {
 
     it('should create group conversation if type is group', async () => {
       conversation_repositories.create_conversation.mockResolvedValueOnce(20);
-      const result = await conversationServices.add_conversation([1, 2, 3], 'group');
+      const result = await conversationServices.add_conversation([1, 2, 3], 'group', { name: "Team" });
       expect(result).toBe(20);
-      expect(conversation_repositories.create_conversation).toHaveBeenCalledWith('group', [1, 2, 3]);
+      expect(conversation_repositories.create_conversation).toHaveBeenCalledWith('group', [1, 2, 3], { name: "Team" });
     });
 
     it('should create direct conversation if type is not provided and not found', async () => {
@@ -28,7 +28,7 @@ describe('Conversation Services', () => {
       conversation_repositories.create_conversation.mockResolvedValueOnce(30);
       const result = await conversationServices.add_conversation([1, 2]);
       expect(result).toBe(30);
-      expect(conversation_repositories.create_conversation).toHaveBeenCalledWith('direct', [1, 2]);
+      expect(conversation_repositories.create_conversation).toHaveBeenCalledWith('direct', [1, 2], {});
     });
   });
 
